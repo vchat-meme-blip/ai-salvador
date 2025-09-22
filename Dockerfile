@@ -1,39 +1,42 @@
-# Stage 1: Build the React application
-FROM node:18-alpine AS build
+# Use Node.js 20 LTS with Debian base
+FROM node:20-slim
 
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Build-time env for Vite (set via --build-arg), with safe defaults
-ARG VITE_ADMIN=0
-ARG VITE_CONVEX_URL
-ARG VITE_CLERK_PUBLISHABLE_KEY
-ENV VITE_ADMIN=$VITE_ADMIN \
-    VITE_CONVEX_URL=$VITE_CONVEX_URL \
-    VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
+# Set Python environment variables
+ENV PYTHON=python3
+ENV PYTHONUNBUFFERED=1
+
+# Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with legacy peer deps
+RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application files
+# Copy source code
 COPY . .
 
-# Build the application for production
-RUN npm run build
+# Environment variables - will be overridden by docker-compose
+ENV NODE_ENV=production \
+    CHOKIDAR_USEPOLLING=true \
+    CI=true \
+    CONVEX_CLI_DISABLE_UPDATE_CHECK=true \
+    CONVEX_CLI_LOG_LEVEL=error \
+    VITE_CONVEX_URL=$VITE_CONVEX_URL \
+    VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY \
+    NPM_CONFIG_PYTHON=/usr/bin/python3
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:stable-alpine
+# Expose port
+EXPOSE 3000
 
-# Copy the built files from the build stage
-COPY --from=build /usr/src/app/dist /usr/share/nginx/html
-
-# Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

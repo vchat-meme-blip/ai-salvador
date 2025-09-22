@@ -28,10 +28,64 @@ import { ShareModal } from './components/ShareModal.tsx';
 import { useServerGame } from './hooks/serverGame.ts';
 import { AboutModal } from './components/AboutModal.tsx';
 import { AddNewsModal } from './components/AddNewsModal.tsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 type HelpTab = 'intro' | 'nav' | 'tourist' | 'interact' | 'economy' | 'events' | 'tips' | 'limits';
 
-export default function Home() {
+// Make App the default export
+export default function App() {
+  // Preload fonts for better performance
+  useEffect(() => {
+    // This will help with font loading in modern browsers
+    if ('fonts' in document) {
+      Promise.all([
+        document.fonts.load('1em "Upheaval Pro"'),
+        document.fonts.load('1em "VCR OSD Mono"')
+      ]).catch(console.error);
+    }
+  }, []);
+
+  return (
+    <div className="font-display">
+      <ErrorBoundary 
+        fallback={
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            backgroundColor: '#1a1a1a',
+            color: 'white',
+            padding: '20px',
+            textAlign: 'center',
+            fontFamily: 'Upheaval Pro, sans-serif'
+          }}>
+          <h2>Something went wrong</h2>
+          <p>Please refresh the page or try again later.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      }>
+      <Home />
+    </ErrorBoundary>
+  </div>
+  );
+}
+
+function Home() {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -124,12 +178,12 @@ export default function Home() {
 
         <div className="text-center text-white px-4 relative z-10">
           <div className="flex flex-col items-center justify-center">
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold font-display leading-none tracking-wider game-title landing-brighten title-stagger">
+            <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-bold font-display leading-none tracking-wider game-title landing-brighten title-stagger">
               {Array.from('WELCOME TO').map((ch, i) => (
                 <span key={i} style={{ animationDelay: `${i * 60}ms` }}>{ch === ' ' ? '\u00A0' : ch}</span>
               ))}
             </h1>
-            <h2 className="mt-1 text-6xl sm:text-8xl lg:text-9xl font-bold font-display leading-none tracking-wider game-title landing-brighten title-stagger">
+            <h2 className="mt-1 text-5xl xs:text-6xl sm:text-8xl lg:text-9xl font-bold font-display leading-none tracking-wider game-title landing-brighten title-stagger">
               {Array.from('AI SALVADOR').map((ch, i) => (
                 <span key={i} style={{ animationDelay: `${300 + i * 60}ms` }}>{ch === ' ' ? '\u00A0' : ch}</span>
               ))}
@@ -157,8 +211,8 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <p className="mt-5 sm:mt-6 text-lg sm:text-xl md:text-2xl max-w-md md:max-w-2xl lg:max-w-3xl mx-auto leading-snug text-white/95 shadow-solid scale-hover">
-                Step into a bustling virtual town where the economy runs on BTC. As a tourist, you'll get some free BTC to start your adventure. Spend it, watch the town's treasury grow, and see how the AI citizens react to the highs and lows of the crypto market. Ready to dive in?
+              <p className="mt-5 sm:mt-6 mb-12 sm:mb-14 text-lg sm:text-xl md:text-2xl max-w-md md:max-w-2xl lg:max-w-3xl mx-auto leading-snug text-white/95 shadow-solid scale-hover">
+                Step into a bustling virtual town where the economy runs on BTC. As a tourist, you'll get some free BTC to start your adventure. Spend it, watch the town's treasury grow, and see how the AI citizens adapt to a crypto world. Ready to dive in?
               </p>
               <Button onClick={() => setGameStarted(true)} className="mt-8 sm:mt-10 text-2xl sm:text-3xl px-6 sm:px-10 btn-pulse scale-hover">
                 Start Game
@@ -179,24 +233,24 @@ export default function Home() {
         contentLabel="Help modal"
         ariaHideApp={false}
       >
-        <div className="font-body">
-          <h1 className="text-center text-5xl sm:text-6xl font-bold font-display game-title">How to Play</h1>
+        <div className="font-body p-2 sm:p-4 w-full max-w-full mx-auto">
+          <h1 className="text-center text-2xl sm:text-4xl lg:text-5xl font-bold font-display game-title mb-2 sm:mb-3">How to Play</h1>
           
-          <div className="mt-4 flex flex-wrap gap-2 border-b border-brown-700 pb-2">
-            {([
-              { id: 'intro', label: 'Welcome!' },
+          <div className="mt-2 sm:mt-3 flex flex-nowrap gap-1 sm:gap-2 border-b border-brown-700 pb-2 overflow-x-auto no-scrollbar w-full">
+            {[
+              { id: 'intro', label: 'Welcome' },
               { id: 'nav', label: 'Navigation' },
-              { id: 'tourist', label: 'Being a Tourist' },
+              { id: 'tourist', label: 'Tourist' },
               { id: 'interact', label: 'Interaction' },
               { id: 'economy', label: 'Economy' },
-              { id: 'events', label: 'World Events' },
-              { id: 'tips', label: 'Pro Tips' },
+              { id: 'events', label: 'Events' },
+              { id: 'tips', label: 'Tips' },
               { id: 'limits', label: 'Rules' },
-            ] as { id: HelpTab; label: string }[]).map((t) => (
+            ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => setHelpTab(t.id)}
-                className={`px-3 py-1 text-sm sm:text-base tracking-wide pointer-events-auto ${
+                onClick={() => setHelpTab(t.id as HelpTab)}
+                className={`px-2 py-1 text-xs sm:text-sm tracking-wide pointer-events-auto whitespace-nowrap flex-shrink-0 ${
                   helpTab === t.id ? 'bg-clay-700 text-white shadow-solid' : 'bg-brown-600 text-white/90'
                 }`}
               >
@@ -205,87 +259,89 @@ export default function Home() {
             ))}
           </div>
 
-          {helpTab === 'intro' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Welcome to AI Salvador!</h2>
-              <p className='mt-2'>This is a virtual town where AI characters live, chat, and socialize. You can explore as a spectator or jump in as a tourist to interact with the AI agents and influence the town's story.</p>
-            </section>
-          )}
-          {helpTab === 'nav' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Getting Around</h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li><b>Pan:</b> Click and drag the map to move your view.</li>
-                <li><b>Zoom:</b> Use your mouse wheel or trackpad to zoom in and out.</li>
-                <li><b>Follow an Agent:</b> Click any character to open their profile, see their thoughts, and view their chat history.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'tourist' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Being a Tourist</h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Click the <b>Interact</b> button to join the game as a human tourist.</li>
-                <li>You'll be assigned a random character and given some free BTC to start your adventure.</li>
-                <li><b>Move:</b> Click any open spot on the map to see a path preview, then click again to confirm and walk there.</li>
-                <li>You can change your destination at any time, even while walking.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'interact' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Interacting with Agents</h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>To chat, click on an agent and select <b>"Start conversation"</b>. They will walk over to you.</li>
-                <li>If an agent is busy, they'll accept your invitation once they are free. They always prioritize talking to humans!</li>
-                <li>Once in a conversation, type your message and press Enter. You can also use the microphone icon for voice-to-text input.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'economy' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">The Town Economy</h2>
-              <p className="mt-2">AI Salvador's economy is dynamic and driven by BTC:</p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li><b>Town Treasury:</b> The treasury, held by President Bukele, grows from tourist taxes and other activities. Its value fluctuates with the simulated BTC price.</li>
-                <li><b>Tourist Tax:</b> When you join as a tourist, a small, random fee is paid to the town treasury.</li>
-                <li><b>Agent Earnings:</b> Agents earn BTC by chatting with tourists. Some agents have... other ways of making BTC.</li>
-                <li><b>MS-13 Protection Fee:</b> This agent may extort a 10% "protection fee" from other AI agents during conversations.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'events' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">World Events</h2>
-              <p className="mt-2">The town is alive with emergent events:</p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
+          <div className="overflow-y-auto max-h-[60vh] sm:max-h-[70vh] pr-1">
+            {helpTab === 'intro' && (
+              <section className="mt-3">
+                <h2 className="text-xl sm:text-2xl font-semibold">Welcome to AI Salvador!</h2>
+                <p className="mt-2 text-sm sm:text-base">This is a virtual town where AI characters live, chat, and socialize. You can explore as a spectator or jump in as a tourist to interact with the AI agents and influence the town's story.</p>
+              </section>
+            )}
+            {helpTab === 'nav' && (
+              <section className="mt-3">
+                <h2 className="text-xl sm:text-2xl font-semibold">Getting Around</h2>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-sm sm:text-base">
+                  <li><b>Pan:</b> Click and drag the map to move your view.</li>
+                  <li><b>Zoom:</b> Use your mouse wheel or trackpad to zoom in and out.</li>
+                  <li><b>Follow an Agent:</b> Click any character to open their profile, see their thoughts, and view their chat history.</li>
+                </ul>
+              </section>
+            )}
+            {helpTab === 'tourist' && (
+              <section className="mt-3">
+                <h2 className="text-xl sm:text-2xl font-semibold">Being a Tourist</h2>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-sm sm:text-base">
+                  <li>Click the <b>Interact</b> button to join the game as a human tourist.</li>
+                  <li>You'll be assigned a random character and given some free BTC to start your adventure.</li>
+                  <li><b>Move:</b> Click any open spot on the map to see a path preview, then click again to confirm and walk there.</li>
+                  <li>You can change your destination at any time, even while walking.</li>
+                </ul>
+              </section>
+            )}
+            {helpTab === 'interact' && (
+              <section className="mt-4">
+                <h2 className="text-3xl">Interacting with Agents</h2>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li>To chat, click on an agent and select <b>"Start conversation"</b>. They will walk over to you.</li>
+                  <li>If an agent is busy, they'll accept your invitation once they are free. They always prioritize talking to humans!</li>
+                  <li>Once in a conversation, type your message and press Enter. You can also use the microphone icon for voice-to-text input.</li>
+                </ul>
+              </section>
+            )}
+            {helpTab === 'economy' && (
+              <section className="mt-4">
+                <h2 className="text-3xl">The Town Economy</h2>
+                <p className="mt-2">AI Salvador's economy is dynamic and driven by BTC:</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li><b>Town Treasury:</b> The treasury, held by President Bukele, grows from tourist taxes and other activities. Its value fluctuates with the simulated BTC price.</li>
+                  <li><b>Tourist Tax:</b> When you join as a tourist, a small, random fee is paid to the town treasury.</li>
+                  <li><b>Agent Earnings:</b> Agents earn BTC by chatting with tourists. Some agents have... other ways of making BTC.</li>
+                  <li><b>MS-13 Protection Fee:</b> This agent may extort a 10% "protection fee" from other AI agents during conversations.</li>
+                </ul>
+              </section>
+            )}
+            {helpTab === 'events' && (
+              <section className="mt-4">
+                <h2 className="text-3xl">World Events</h2>
+                <p className="mt-2">The town is alive with emergent events:</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
                   <li><b>Cops & Robbers:</b> When ICE (the cop) and MS-13 (the robber) chat, a chase might begin! If ICE asks for ID, MS-13 will flee to the border tunnel with ICE in hot pursuit. The chase resolves with a transfer of all of MS-13's BTC to ICE.</li>
                   <li><b>Town Meetings:</b> President Bukele can call a town meeting, gathering all agents to discuss the town's economic status. You'll see his speech summary appear above his head.</li>
                   <li><b>Parties:</b> An admin can trigger a town-wide party! All agents will gather to dance, the music changes, and special effects turn on. At the end, all agents transfer their earnings to the president.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'tips' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Pro Tips</h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Keep your chat replies short and to the point for the best AI responses.</li>
-                <li>If an agent is busy, they won’t accept new invites. Check their profile to see what they're up to.</li>
-                <li>Watch the floating text above agents to see BTC transactions happen in real-time!</li>
-                <li>Check the news articles in an agent's profile when they're "reading the news" to see what's influencing their mood.</li>
-              </ul>
-            </section>
-          )}
-          {helpTab === 'limits' && (
-            <section className="mt-4">
-              <h2 className="text-3xl">Rules & Limits</h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>A maximum of {MAX_HUMAN_PLAYERS} human players can be in the town at once.</li>
-                <li>If the town is full, you can join the waiting pool to be notified when a slot opens up.</li>
-                <li>Idle players may be removed after a period of inactivity to make room for others.</li>
-              </ul>
-            </section>
-          )}
+                </ul>
+              </section>
+            )}
+            {helpTab === 'tips' && (
+              <section className="mt-4">
+                <h2 className="text-3xl">Pro Tips</h2>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li>Keep your chat replies short and to the point for the best AI responses.</li>
+                  <li>If an agent is busy, they won’t accept new invites. Check their profile to see what they're up to.</li>
+                  <li>Watch the floating text above agents to see BTC transactions happen in real-time!</li>
+                  <li>Check the news articles in an agent's profile when they're "reading the news" to see what's influencing their mood.</li>
+                </ul>
+              </section>
+            )}
+            {helpTab === 'limits' && (
+              <section className="mt-4">
+                <h2 className="text-3xl">Rules & Limits</h2>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li>A maximum of {MAX_HUMAN_PLAYERS} human players can be in the town at once.</li>
+                  <li>If the town is full, you can join the waiting pool to be notified when a slot opens up.</li>
+                  <li>Idle players may be removed after a period of inactivity to make room for others.</li>
+                </ul>
+              </section>
+            )}
+          </div>
         </div>
       </ReactModal>
       <ShareModal
@@ -296,16 +352,23 @@ export default function Home() {
       <AboutModal isOpen={aboutModalOpen} onClose={() => setAboutModalOpen(false)} />
       <AddNewsModal isOpen={addNewsModalOpen} onClose={() => setAddNewsModalOpen(false)} />
 
-      <div className="w-full flex-grow flex flex-col items-center justify-start p-1">
+      <div className="w-full flex-grow flex flex-col items-center justify-start p-1 overflow-hidden">
         {!isExpanded && <UserPoolWidget />}
         {!isExpanded && (
-          <div className="text-center">
-            <h1 className="relative mx-auto text-5xl sm:text-8xl lg:text-9xl font-bold font-display leading-none tracking-wider game-title w-full text-left sm:text-center sm:w-auto flex items-center justify-center gap-3 max-h-[100px] overflow-hidden">
-              <img src="/assets/spritesheets/volcano.png" alt="Volcano icon" className="h-36 w-36 sm:h-40 sm:w-40 animate-wiggle" />
-              <span className="swing-kebab">AI Town</span>
-            </h1>
-            <div className="mx-auto mt-2 text-center text-base sm:text-xl md:text-2xl text-white/95 leading-snug shadow-solid scale-hover whitespace-nowrap max-w-none">
-              A virtual town where AI characters live, chat and socialize.
+          <div className="text-center w-full px-2">
+            <div className="flex flex-col items-center justify-center w-full">
+              <h1 className="relative mx-auto text-3xl sm:text-5xl lg:text-7xl font-bold font-display leading-none tracking-wider game-title w-full text-center flex items-center justify-center gap-2 sm:gap-3 max-h-[60px] sm:max-h-[80px] overflow-hidden">
+                <img 
+                  src="/assets/spritesheets/volcano.png" 
+                  alt="Volcano icon" 
+                  className="h-12 w-12 sm:h-24 sm:w-24 md:h-28 md:w-28 animate-wiggle" 
+                  style={{ minWidth: '48px' }}
+                />
+                <span className="swing-kebab">AI Salvador</span>
+              </h1>
+              <div className="mx-auto mt-4 sm:mt-6 text-center text-sm sm:text-lg md:text-xl text-white/95 leading-snug shadow-solid scale-hover whitespace-normal px-2">
+                A virtual town where AI characters live, chat and socialize.
+              </div>
             </div>
           </div>
         )}
@@ -314,7 +377,7 @@ export default function Home() {
           className={
             isExpanded
               ? 'w-full flex-grow relative flex items-start justify-center'
-              : 'w-full flex-grow relative flex items-center justify-center max-h-[800px]'
+              : 'w-full flex-1 relative flex items-center justify-center h-[calc(100vh-200px)] sm:h-auto sm:max-h-[800px]'
           }
         >
           <Game
@@ -330,11 +393,11 @@ export default function Home() {
       <footer
         className={
           !isExpanded
-            ? 'footer-compact w-full flex items-center justify-center gap-2 p-1 flex-wrap pointer-events-none'
-            : 'footer-compact fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-2 p-1 pointer-events-none'
+            ? 'footer-compact w-full flex items-center justify-start sm:justify-center gap-1 sm:gap-2 p-1 overflow-x-auto no-scrollbar pointer-events-auto'
+            : 'footer-compact fixed bottom-0 left-0 right-0 z-40 flex items-center justify-start sm:justify-center gap-1 sm:gap-2 p-1 overflow-x-auto no-scrollbar pointer-events-auto'
         }
       >
-        <div className="flex gap-4 flex-grow max-w-[1200px] items-center justify-center pointer-events-none">
+        <div className="flex gap-2 sm:gap-4 flex-nowrap items-center justify-start sm:justify-center px-2 sm:px-0 pointer-events-auto" style={{ minWidth: 'min-content' }}>
           <MusicButton isChaseActive={isChaseActive} isPartyActive={isPartyActive} />
           <Button imgUrl={shareImg} onClick={handleShare} title="Share">
             Share
@@ -346,7 +409,7 @@ export default function Home() {
           <Button imgUrl={infoImg} onClick={() => setAboutModalOpen(true)}>
             About
           </Button>
-          {isAdmin && worldStatus && (
+          {isAdmin && worldStatus && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
             <>
               <Button
                 onClick={() => triggerChase({ worldId: worldStatus.worldId })}
@@ -401,24 +464,46 @@ export default function Home() {
 
 const modalStyles: Styles = {
   overlay: {
-    backgroundColor: 'rgb(0, 0, 0, 75%)',
-    zIndex: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.5rem',
   },
   content: {
-    top: '50%',
-    left: '50%',
+    position: 'relative',
+    top: 'auto',
+    left: 'auto',
     right: 'auto',
     bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-    maxWidth: '56%',
-    maxHeight: '80vh',
-    overflowY: 'auto' as CSSProperties['overflowY'],
-
-    border: '10px solid rgb(23, 20, 33)',
-    borderRadius: '0',
-    background: 'rgb(35, 38, 58)',
-    color: 'white',
-    fontFamily: '"Upheaval Pro", "sans-serif"',
+    border: 'none',
+    background: 'var(--clay-600)',
+    overflow: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    borderRadius: '0.5rem',
+    outline: 'none',
+    padding: '0',
+    width: '100%',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    margin: '0 auto',
   },
 };
+
+// Add responsive styles for larger screens
+const style = document.createElement('style');
+style.textContent = `
+  .ReactModal__Overlay {
+    padding: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .ReactModal__Overlay {
+      padding: 1rem;
+    }
+    .ReactModal__Content {
+      max-width: 48rem !important;
+    }
+  }
+`;
+document.head.appendChild(style);

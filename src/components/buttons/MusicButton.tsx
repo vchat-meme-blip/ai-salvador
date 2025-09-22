@@ -5,14 +5,98 @@ import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { toast } from 'react-toastify';
 
+// Permissions overlay component
+function PermissionsOverlay({ onRequestPermission, isAudioBlocked }: { onRequestPermission: () => void, isAudioBlocked: boolean }) {
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [permissionState, setPermissionState] = useState<PermissionState>('prompt');
+  const [showDismiss, setShowDismiss] = useState(false);
+
+  useEffect(() => {
+    // Show dismiss button after a delay
+    const dismissTimer = setTimeout(() => setShowDismiss(true), 3000);
+    
+    // Check if the browser supports the permissions API
+    if ('permissions' in navigator) {
+      // @ts-ignore - autoplay permission is not in the TypeScript lib yet
+      const permissionName = 'autoplay' as PermissionName;
+      navigator.permissions.query({ name: permissionName })
+        .then(permissionStatus => {
+          setPermissionState(permissionStatus.state);
+          permissionStatus.onchange = () => {
+            setPermissionState(permissionStatus.state);
+          };
+        })
+        .catch(console.error);
+    }
+
+    // Show overlay after a short delay if audio is blocked
+    const showTimer = setTimeout(() => {
+      if (isAudioBlocked || permissionState === 'denied') {
+        setShowOverlay(true);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(dismissTimer);
+    };
+  }, [isAudioBlocked, permissionState]);
+
+  if (!showOverlay || (permissionState === 'granted' && !isAudioBlocked)) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 bg-clay-800 bg-opacity-95 text-white p-4 rounded-lg shadow-lg z-[100] max-w-xs border border-clay-600">
+      <div className="flex items-start">
+        <div className="flex-1">
+          <p className="text-sm font-medium mb-2">🔊 Allow Audio</p>
+          <p className="text-xs text-clay-200 mb-3">To enable background music, please allow audio playback in your browser.</p>
+          <div className="flex gap-2">
+            <button
+              onClick={onRequestPermission}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded transition-colors"
+            >
+              Allow Audio
+            </button>
+            {showDismiss && (
+              <button
+                onClick={() => setShowOverlay(false)}
+                className="text-xs px-3 py-1.5 rounded border border-clay-600 hover:bg-clay-700 transition-colors"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
+        </div>
+        <button 
+          onClick={() => setShowOverlay(false)}
+          className="ml-2 text-clay-400 hover:text-white"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Helper function to handle audio playback with autoplay support
+const createAudioElement = (src?: string) => {
+  const audio = new Audio(src);
+  audio.preload = 'auto';
+  audio.volume = 0.5;
+  return audio;
+};
+
 export default function MusicButton({ isChaseActive, isPartyActive }: { isChaseActive: boolean, isPartyActive: boolean }) {
   const musicUrl = useQuery(api.music.getBackgroundMusic);
   const [userWantsMusic, setUserWantsMusic] = useState<boolean>(
     () => localStorage.getItem('musicOn') === '1',
   );
+  const [isAudioBlocked, setIsAudioBlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const partyAudioRef = useRef<HTMLAudioElement | null>(null);
   const [currentSong, setCurrentSong] = useState(0);
+  const hasInteracted = useRef(false);
 
   // Use assets that exist in public/assets
   const partyPlaylist = [
@@ -164,16 +248,61 @@ export default function MusicButton({ isChaseActive, isPartyActive }: { isChaseA
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
+  const toggleMusic = async () => {
+    if (!hasInteracted.current) {
+      hasInteracted.current = true;
+      // Try to play audio on first interaction to unlock audio context
+      try {
+        if (audioRef.current) {
+          await audioRef.current.play().catch(() => {});
+          await audioRef.current.pause();
+          setIsAudioBlocked(false);
+        }
+      } catch (e) {
+        console.error('Audio playback failed:', e);
+        setIsAudioBlocked(true);
+      }
+    }
+    flipSwitch();
+  };
+
+  const handleRequestPermission = () => {
+    if (audioRef.current) {
+      audioRef.current.play()
+        .then(() => {
+          audioRef.current?.pause();
+          setIsAudioBlocked(false);
+        })
+        .catch((e) => {
+          console.error('Permission request failed:', e);
+          setIsAudioBlocked(true);
+        });
+    }
+  };
+
   return (
     <>
-      <Button
-        onClick={() => void flipSwitch()}
-        className="hidden lg:block"
-        title="Play AI generated music (press m to play/mute)"
-        imgUrl={volumeImg}
+      <button
+        onClick={toggleMusic}
+        className="button text-white shadow-solid pointer-events-auto text-xs"
+        title={userWantsMusic ? 'Turn music off' : 'Turn music on'}
       >
-        {userWantsMusic ? 'Mute' : 'Music'}
-      </Button>
+        <div className="inline-block bg-clay-700 px-1.5 py-0.5">
+          <div className="flex items-center gap-1">
+            <img
+              className={`w-3 h-3 ${isPartyActive ? 'animate-pulse' : ''}`}
+              src={volumeImg}
+              alt="Volume"
+            />
+            <span>{isPartyActive ? 'Party!' : 'Music'}</span>
+          </div>
+        </div>
+      </button>
+      
+      <PermissionsOverlay 
+        onRequestPermission={handleRequestPermission} 
+        isAudioBlocked={isAudioBlocked} 
+      />
     </>
   );
 }

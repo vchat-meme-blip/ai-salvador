@@ -1,20 +1,12 @@
-// Audio context manager to handle browser autoplay policies and music state
+// Audio context manager to handle browser autoplay policies
 class AudioContextManager {
-  private static readonly STORAGE_KEY = 'audioState';
   private static instance: AudioContextManager;
   private audioContext: AudioContext | null = null;
   private isUnlocked = false;
-  private musicState: {
-    isPlaying: boolean;
-    isPartyMusic: boolean;
-    trackIndex: number;
-    volume: number;
-  } | null = null;
 
   private constructor() {
     this.setupAudioContext();
     this.setupUnlockHandlers();
-    this.loadState();
   }
 
   public static getInstance(): AudioContextManager {
@@ -103,60 +95,6 @@ class AudioContextManager {
 
   public get isContextUnlocked(): boolean {
     return this.isUnlocked;
-  }
-
-  // State management
-  private loadState() {
-    try {
-      const saved = localStorage.getItem(AudioContextManager.STORAGE_KEY);
-      if (saved) {
-        this.musicState = JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to load audio state', e);
-      this.clearState();
-    }
-  }
-
-  public saveMusicState(isPlaying: boolean, isPartyMusic: boolean, trackIndex: number, volume: number) {
-    this.musicState = { isPlaying, isPartyMusic, trackIndex, volume };
-    try {
-      localStorage.setItem(AudioContextManager.STORAGE_KEY, JSON.stringify(this.musicState));
-    } catch (e) {
-      console.warn('Failed to save audio state', e);
-    }
-  }
-
-  public getMusicState() {
-    return this.musicState;
-  }
-
-  public clearState() {
-    this.musicState = null;
-    try {
-      localStorage.removeItem(AudioContextManager.STORAGE_KEY);
-    } catch (e) {
-      console.warn('Failed to clear audio state', e);
-    }
-  }
-
-  public async playAudio(audio: HTMLAudioElement, volume: number = 0.7): Promise<void> {
-    try {
-      await this.resumeContext();
-      audio.volume = 0; // Start silent
-      await audio.play();
-      // Fade in
-      const fadeIn = setInterval(() => {
-        if (audio.volume < volume) {
-          audio.volume = Math.min(audio.volume + 0.1, volume);
-        } else {
-          clearInterval(fadeIn);
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      throw error;
-    }
   }
 }
 
