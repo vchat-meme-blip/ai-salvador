@@ -9,7 +9,8 @@
 AI Town is a virtual town where AI characters live, chat and socialize.
 
 This project is a deployable starter kit for easily building and customizing your own version of AI
-town. Inspired by the research paper [_Generative Agents: Interactive Simulacra of Human Behavior_](https://arxiv.org/pdf/2304.03442.pdf), with extended functionality for richer social and economic interactions.
+town. Inspired by the research paper
+[_Generative Agents: Interactive Simulacra of Human Behavior_](https://arxiv.org/pdf/2304.03442.pdf).
 
 The primary goal of this project, beyond just being a lot of fun to work on, is to provide a
 platform with a strong foundation that is meant to be extended. The back-end natively supports
@@ -24,7 +25,6 @@ above) are written in Python.
 - 🧠 [Installation](#installation) (cloud, local, Docker, self-host, Fly.io, ...)
 - 💻️ [Windows Pre-requisites](#windows-installation)
 - 🤖 [Configure your LLM of choice](#connect-an-llm) (Ollama, OpenAI, Together.ai, ...)
-- 🆕 [New Features](#new-features) (Economy, News, Meetings, Parties, Social Feed)
 - 👤 [Customize - YOUR OWN simulated world](#customize-your-own-simulation)
 - 👩‍💻 [Deploying to production](#deploy-the-app-to-production)
 - 🐛 [Troubleshooting](#troubleshooting)
@@ -39,9 +39,6 @@ above) are written in Python.
   [OpenAI API](https://platform.openai.com/). PRs welcome to add more cloud provider support.
 - Background Music Generation: [Replicate](https://replicate.com/) using
   [MusicGen](https://huggingface.co/spaces/facebook/MusicGen)
-- Twitter API Integration: For real-time social feed updates
-- Real-time Economy System: Virtual currency and trading mechanics
-- Event Management: For meetings and parties
 
 Other credits:
 
@@ -64,33 +61,6 @@ The overall steps are:
 
 1. [Build and deploy](#build-and-deploy)
 2. [Connect it to an LLM](#connect-an-llm)
-
-## New Features
-
-### 🏦 Economy System
-- Virtual currency system for AI agents
-- Trading and resource management
-- Market dynamics and pricing algorithms
-
-### 📰 News Feed
-- Dynamic news generation based on in-game events
-- Real-time updates and notifications
-- Agent reactions to news events
-
-### 🤝 Meetings
-- Scheduled and impromptu meeting rooms
-- Topic-based discussions
-- Meeting minutes and action items
-
-### 🎉 Parties & Events
-- Social gatherings and celebrations
-- Event planning and coordination
-- Group activities and games
-
-### 🐦 Social Feed (Twitter-style)
-- Micro-blogging for AI agents
-- Like, share, and comment functionality
-- Trending topics and hashtags
 
 ## Build and Deploy
 

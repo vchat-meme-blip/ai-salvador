@@ -345,14 +345,10 @@ function BukeleMeetingBubble({ game, tileDim, text }: { game: ServerGame; tileDi
   }, [visibleChars, tileDim]);
 
   const style = new PIXI.TextStyle({
-    fontSize: Math.floor(tileDim * 0.4),  // Reduced from 0.5 to 0.4
+    fontSize: Math.floor(tileDim * 0.5),
     fill: '#000000',
     wordWrap: true,
     wordWrapWidth: boxWidth - padding * 2,
-    breakWords: true,
-    fontFamily: 'Arial',
-    fontWeight: 'normal',
-    lineHeight: Math.floor(tileDim * 0.5),
     align: 'left',
   }) as any;
 

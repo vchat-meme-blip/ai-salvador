@@ -19,43 +19,22 @@ AI Salvador is a dynamic virtual world where AI-powered agents live, socialize, 
 - **Real-time Interaction:** Engage in live text or voice-to-text conversations with AI agents who remember past interactions and react to world events.
 
 ### World & Agent Dynamics
-- **Persistent Agents:** AI agents have unique personalities, memories, and daily plans. They form relationships, share information, and react to their environment and news events.
-- **Enhanced Social Systems:**
-  - **Meetings & Conferences:** Agents can organize and attend scheduled meetings with specific agendas and action items.
-  - **Social Gatherings:** Expanded party system with different types of events (birthdays, celebrations, protests).
-  - **Social Media Integration:** Twitter-style feed where agents can post updates, share news, and interact with each other's content.
+- **Persistent Agents:** AI agents have unique personalities, memories, and daily plans. They form relationships, share information, and react to their environment.
 - **Emergent Events:** The simulation engine enables unscripted events based on agent interactions:
     - **Cops & Robbers Chase:** A high-speed chase between the town's police (ICE) and a robber (MS-13) can be triggered by specific conversation keywords, leading to a dramatic showdown at the border tunnel.
     - **Town Meetings:** President Bukele can call all agents to a town meeting to discuss the economy, with his speech visible to observers.
-    - **Parties & Events:** Enhanced party system with different themes, activities, and group behaviors.
-- **Information Ecosystem:**
-  - **Dynamic News System:** AI-generated news articles based on in-game events, affecting agent behavior and market conditions.
-  - **Rumors & Gossip:** Information spreads through the agent network, with varying levels of reliability.
-  - **Social Media Feed:** Real-time micro-blogging platform where agents post updates and react to world events.
+    - **Parties:** Admins can trigger spontaneous parties where all agents gather to dance, accompanied by special music and visual effects.
+- **Information Flow:** Agents read news articles that influence their mood and conversation topics, creating a dynamic information ecosystem.
 
 ### Economic System
-- **BTC-driven Economy:** The entire town economy is simulated around BTC with an enhanced trading system.
-- **Town Treasury:** A central treasury, managed by President Bukele, grows through tourist taxes, market fees, and other in-game activities. Its value is tied to a simulated, fluctuating BTC price.
-- **Agent Portfolios:** Every agent maintains a BTC balance and inventory, with the ability to trade items and currency with other agents and players.
-- **Marketplace System:** Players and agents can list items for sale, place bids, and complete transactions with a secure escrow system.
-- **Live Transactions:** All economic exchanges are visualized with real-time floating text notifications, making the flow of BTC and items visible and engaging.
-- **Economic Events:** Random market fluctuations and special economic events that affect prices and trading behavior.
+- **BTC-driven Economy:** The entire town economy is simulated around BTC.
+- **Town Treasury:** A central treasury, managed by President Bukele, grows through tourist taxes and other in-game activities. Its value is tied to a simulated, fluctuating BTC price.
+- **Agent Portfolios:** Every agent maintains a BTC balance, earning from tourists and engaging in unique economic behaviors like charging "protection fees."
+- **Live Transactions:** All economic exchanges are visualized with real-time floating text notifications, making the flow of BTC visible and engaging.
 
 ### Admin & Customization
-- **Enhanced Admin Controls:** 
-  - Real-time event triggering (chase, meeting, party, economic events)
-  - News management system with scheduled publishing
-  - Market controls and economic adjustments
-  - Social media moderation tools
-  - Meeting and event scheduling
-- **Highly Extensible:** The entire platform is designed as a starter kit. You can easily customize:
-  - Characters and their economic behaviors
-  - Dialogue systems and conversation topics
-  - Market mechanics and trading rules
-  - News generation algorithms
-  - Social media engagement patterns
-  - Map layouts and interactive elements
-  - Core game mechanics and simulation rules
+- **Admin Controls:** An optional admin panel allows for real-time event triggering (chase, meeting, party) and the ability to inject new news articles into the world.
+- **Highly Extensible:** The entire platform is designed as a starter kit. You can easily customize characters, dialogue, map layouts, and even core game mechanics.
 
 ---
 
@@ -70,17 +49,9 @@ The backend is powered by Convex, a reactive database and serverless function pl
     - `worlds`: A single document containing the real-time state of all players, agents, and active conversations.
     - `worldStatus`: Manages the state of the game engine (running, stopped, inactive).
     - `villageState`: A singleton document tracking global economic data like the treasury balance, BTC price, and event flags (`isPartyActive`, `meeting`).
-    - `economy`: Manages the virtual economy including:
-      - `portfolios`: Agent and player asset holdings
-      - `transactions`: Complete history of all economic activities
-      - `marketListings`: Active buy/sell orders in the marketplace
-      - `inventories`: Item collections for each player/agent
-    - `news`: Articles and announcements affecting the game world
-    - `meetings`: Scheduled and active meetings with participants and minutes
-    - `events`: Social gatherings and special occasions
-    - `social`: Twitter-style posts, comments, and reactions
+    - `portfolios` & `transactions`: Track the BTC holdings and economic activity of every character.
     - `waitingPool`: Manages users waiting for a slot to open up in the game world.
-    - `memories`: A vector-searchable table where agents store summaries of their conversations and experiences, enabling long-term memory and contextual awareness.
+    - `memories`: A vector-searchable table where agents store summaries of their conversations, enabling long-term memory.
 
 - **Game Engine (`convex/engine/`):**
     - A custom, tick-based simulation engine that runs server-side.
@@ -88,7 +59,7 @@ The backend is powered by Convex, a reactive database and serverless function pl
     - **Input Handling:** Player and agent actions are submitted as "inputs" which are queued and processed transactionally by the engine, ensuring consistency.
     - **Historical State:** To enable smooth animation on the client, the engine records high-fidelity positional data for players during each tick and sends this history to the client for interpolation.
 
-- **Agent Logic (`convex/agent/`):
+- **Agent Logic (`convex/agent/`):**
     - Each agent runs its logic within the game loop (`Agent.tick`).
     - For long-running tasks like generating dialogue with an LLM, an agent schedules a Convex `internalAction`.
     - This architecture allows agents to perform complex, asynchronous tasks without blocking the main game simulation.
@@ -96,28 +67,19 @@ The backend is powered by Convex, a reactive database and serverless function pl
 ### Frontend (React + Vite + PixiJS)
 The frontend is a modern React application responsible for rendering the game world and handling user input.
 
-- **Rendering (`src/components/PixiGame.tsx`):
+- **Rendering (`src/components/PixiGame.tsx`):**
     - We use PixiJS for high-performance 2D rendering of the map, characters, and special effects. `@pixi/react` provides the bridge between React's component model and the PixiJS canvas.
     - A custom `PixiViewport` component handles panning, zooming, and camera animations.
-    - Enhanced UI components for the economy, news feed, and social media interfaces.
-    - Real-time notifications for market activities, news events, and social interactions.
 
-- **State Management (Convex Hooks):
+- **State Management (Convex Hooks):**
     - The UI is kept in sync with the backend using Convex's real-time hooks (`useQuery`, `useMutation`).
     - `useServerGame`: A custom hook that fetches and parses all necessary game data.
     - `useHistoricalTime` & `useHistoricalValue`: Custom hooks that consume the historical state from the engine to interpolate character positions, ensuring smooth movement even though the server only sends full updates periodically.
 
-- **Key UI Components:
 - **Key UI Components:**
     - `UserPoolWidget.tsx`: Manages the "Law of the Jungle" waiting pool, showing live counts and providing join/leave actions.
-    - `Treasury.tsx`: Displays the town's economic status with detailed market analytics.
+    - `Treasury.tsx`: Displays the town's economic status.
     - `PlayerDetails.tsx`: The main sidebar component for viewing character profiles, conversation histories, and initiating chats.
-    - `Marketplace.tsx`: Interface for buying, selling, and trading items in the virtual economy.
-    - `NewsFeed.tsx`: Displays current events and news articles affecting the game world.
-    - `SocialFeed.tsx`: Twitter-style feed showing agent posts and interactions.
-    - `MeetingRoom.tsx`: Interface for participating in scheduled meetings and events.
-    - `Inventory.tsx`: Manages the player's items and assets.
-    - `EventCalendar.tsx`: Shows upcoming events and meetings in the game world.
 
 ---
 

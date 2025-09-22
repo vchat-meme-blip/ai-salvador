@@ -1,8 +1,7 @@
-# Use Node.js LTS
-FROM node:18-alpine
+# Stage 1: Build the React application
+FROM node:18-alpine AS build
 
-# Set working directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Build-time env for Vite (set via --build-arg), with safe defaults
 ARG VITE_ADMIN=0
@@ -12,17 +11,29 @@ ENV VITE_ADMIN=$VITE_ADMIN \
     VITE_CONVEX_URL=$VITE_CONVEX_URL \
     VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 
-# Copy package files
+# Copy dependency files
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
+# Copy the rest of the application files
 COPY . .
 
-# Expose ports
-EXPOSE 3000
+# Build the application for production
+RUN npm run build
 
-# Start development server
-CMD ["npm", "run", "dev"]
+# Stage 2: Serve the application with Nginx
+FROM nginx:stable-alpine
+
+# Copy the built files from the build stage
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
+
+# Copy the Nginx configuration file
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

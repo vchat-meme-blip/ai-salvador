@@ -5,13 +5,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import Home from './App.tsx';
 import './index.css';
 import 'uplot/dist/uPlot.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import ConvexClientProvider from './components/ConvexClientProvider.tsx';
 import { ClerkProvider } from '@clerk/clerk-react';
-import ErrorBoundary from './components/ErrorBoundary';
 
 // Fix: Cast import.meta to any to avoid TypeScript errors when accessing environment variables.
 const publishableKey = (import.meta as any).env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -21,20 +20,10 @@ if (!publishableKey) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary
-      fallback={
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h2>Something went wrong</h2>
-          <p>Please refresh the page or try again later.</p>
-          <button onClick={() => window.location.reload()}>Refresh Page</button>
-        </div>
-      }
-    >
-      <ClerkProvider publishableKey={publishableKey}>
-        <ConvexClientProvider>
-          <App />
-        </ConvexClientProvider>
-      </ClerkProvider>
-    </ErrorBoundary>
+    <ClerkProvider publishableKey={publishableKey}>
+      <ConvexClientProvider>
+        <Home />
+      </ConvexClientProvider>
+    </ClerkProvider>
   </React.StrictMode>,
 );

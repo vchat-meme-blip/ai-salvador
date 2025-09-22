@@ -41,27 +41,14 @@ into regular Convex tables, queries, and mutations, only logging key bits into g
 
 AI Town's data model has a few concepts:
 
-- **Worlds** (`convex/aiTown/world.ts`): Represent a map with many players interacting together.
-- **Players** (`convex/aiTown/player.ts`): The core characters in the game with names, descriptions, and may be associated with a human user. Players can have virtual currency and inventory.
-- **Economy** (`convex/aiTown/economy/`): Manages virtual currency, trading, and resource management.
-  - `wallet.ts`: Tracks player balances and transactions
-  - `market.ts`: Handles item listings and trading
-  - `inventory.ts`: Manages player items and resources
-- **News System** (`convex/aiTown/news/`): Manages in-game news and announcements
-  - `newsFeed.ts`: Handles news articles and updates
-  - `notifications.ts`: Manages player notifications
-- **Meetings** (`convex/aiTown/meetings/`): Handles scheduled and impromptu meetings
-  - `meetingRooms.ts`: Manages meeting spaces and schedules
-  - `minutes.ts`: Tracks meeting discussions and action items
-- **Parties** (`convex/aiTown/parties/`): Manages social events and gatherings
-  - `events.ts`: Handles event creation and management
-  - `activities.ts`: Manages group activities and games
-- **Social Feed** (`convex/aiTown/social/`): Twitter-style micro-blogging
-  - `posts.ts`: Manages user posts and interactions
-  - `comments.ts`: Handles comments on posts
-  - `reactions.ts`: Manages likes and other reactions
-- **Conversations** (`convex/aiTown/conversations.ts`): Created by a player and end at some point in time.
-- **Conversation Memberships** (`convex/aiTown/conversationMembership.ts`): Indicate that a player is a member of a conversation. Players may only be in one conversation at any point in time, and conversations can have multiple members. Memberships may be in one of three states:
+- Worlds (`convex/aiTown/world.ts`) represent a map with many players interacting together.
+- Players (`convex/aiTown/player.ts`) are the core characters in the game. Players have human readable names and
+  descriptions, and they may be associated with a human user. At any point in time, a player may be pathfinding
+  towards some destination and has a current location.
+- Conversations (`convex/aiTown/conversations.ts`) are created by a player and end at some point in time.
+- Conversation memberships (`convex/aiTown/conversationMembership.ts`) indicate that a player is a member
+  of a conversation. Players may only be in one conversation at any point in time, and conversations
+  currently have exactly two members. Memberships may be in one of three states:
   - `invited`: The player has been invited to the conversation but hasn't accepted yet.
   - `walkingOver`: The player has accepted the invite to the conversation but is too far away to talk. The
     player will automatically join the conversation when they get close enough.
@@ -71,30 +58,11 @@ AI Town's data model has a few concepts:
 
 There are three main categories of tables:
 
-1. **Engine Tables** (`convex/engine/schema.ts`): Core engine state management.
-   - `_scheduled_functions`: Tracks scheduled operations
-   - `_storage`: Internal storage for engine state
-
-2. **Game Tables** (`convex/aiTown/schema.ts`): Core game state including:
-   - `worlds`: Game world configurations
-   - `players`: Player information and statistics
-   - `conversations`: Active conversations
-   - `conversationMemberships`: Player participation in conversations
-   - `messages`: Chat messages
-   - `economy`: Virtual currency and transactions
-   - `market`: Item listings and trading
-   - `inventories`: Player item collections
-   - `news`: In-game news articles
-   - `meetings`: Scheduled and active meetings
-   - `parties`: Social events and gatherings
-   - `posts`: Social media posts
-   - `comments`: Comments on posts
-   - `reactions`: User reactions to content
-
-3. **Agent Tables** (`convex/agent/schema.ts`): State for AI agents including:
-   - `memories`: Agent knowledge and experiences
-   - `goals`: Current objectives and tasks
-   - `preferences`: Agent behavior and interaction preferences
+1. Engine tables (`convex/engine/schema.ts`) for maintaining engine-internal state.
+2. Game tables (`convex/aiTown/schema.ts`) for game state. To keep game state small and efficient to
+   read and write, we store AI Town's data model across a few tables. See `convex/aiTown/schema.ts` for an overview.
+3. Agent tables (`convex/agent/schema.ts`) for agent state. Agents can freely read and write to these tables
+   within their actions.
 
 ### Inputs (`convex/aiTown/inputs.ts`)
 
